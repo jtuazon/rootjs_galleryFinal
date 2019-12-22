@@ -1,9 +1,13 @@
 /* your javascript goes in this file */
 
 $(document).ready(initiateApp);
-
+/* moved landscape-2 through -9 between landscape-1 and -10 */
 var pictures = [
 	'images/landscape-1.jpg',
+	'images/landscape-2.jpg',
+	'images/landscape-3.jpg',
+	'images/landscape-8.jpg',
+	'images/landscape-9.jpg',
 	'images/landscape-10.jpg',
 	'images/landscape-11.jpg',
 	'images/landscape-13.jpg',
@@ -11,10 +15,6 @@ var pictures = [
 	'images/landscape-17.jpg',
 	'images/landscape-18.jpg',
 	'images/landscape-19.jpg',
-	'images/landscape-2.jpg',
-	'images/landscape-3.jpg',
-	'images/landscape-8.jpg',
-	'images/landscape-9.jpg',
 	'images/pexels-photo-132037.jpeg',
 	'images/pretty.jpg',
 ];
@@ -53,6 +53,22 @@ function initiateApp(){
 		Documentation: http://api.jqueryui.com/sortable/
 		Example or sorting in action: https://jqueryui.com/sortable/
 	*/
+	var initialIndex;
+	$("#gallery").sortable({
+		start: function(event, ui){
+			// initialIndex = (pictures.indexOf(ui.item.attr("imgPath")));
+			initialIndex = ui.item.index();
+			console.log("Current image: ", ui.item.text());
+			console.log("Initial index: ", initialIndex);
+		},
+		update: function(event, ui){
+			var finalIndex = ui.item.index();
+			console.log("Final index: ", finalIndex);
+			var change = pictures.splice(initialIndex, 1);
+			pictures.splice(finalIndex, 0, change[0]);
+			console.log("New pictures array: ", pictures);
+		}
+	});
 	makeGallery(pictures);
 	addModalCloseHandler();
 }
@@ -111,8 +127,16 @@ function initiateApp(){
  **/
 
 function makeGallery(imageArray){
-
+	for (var i = 0; i < imageArray.length; i++) {
+		var fig = $("<figure>").addClass("imageGallery col-xs-12 col-sm-6 col-md-4").attr("imgPath", imageArray[i]).css("background-image", "url("+imageArray[i]+")");
+		$(fig).click(displayImage);
+		var start = imageArray[i].indexOf("/") + 1;
+		var end = imageArray[i].indexOf(".");
+		var caption = $("<figcaption>").text(imageArray[i].slice(start, end));
+		fig.append(caption);
+		$("#gallery").append(fig);
 	}
+}
 
 	/**
  * addModalCloseHandler
@@ -140,7 +164,9 @@ function makeGallery(imageArray){
  */
 
 function addModalCloseHandler(){
-
+	$("#modalImage").click(function(){
+		$("#galleryModal").modal("hide");
+	});
 }
 
 /**
@@ -181,6 +207,11 @@ function addModalCloseHandler(){
  *   - https://www.w3schools.com/bootstrap/bootstrap_ref_js_modal.asp (Check the Modal Methods section)
  */
 
-function displayImage(){
-
+function displayImage(event){
+	var element = $(this);
+	var imagePath = element.attr("imgPath");
+	var imageTitle = imagePath.slice(imagePath.indexOf("/") + 1, imagePath.indexOf("."));
+	$(".modal-title").text(imageTitle);
+	$("#modalImage").attr("src", imagePath);
+	$("#galleryModal").modal("show");
 }
